@@ -1,31 +1,40 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import Pokemon from '../types';
+import { Pokemon, Pagination, PokemonResponse } from '../types';
 
-const useFetchPokemon = () => {
-    const [data, setData] = useState<any>(null);
+const useFetchPokemon = (page: number, max: number) => {
+    const [pokemon, setPokemon] = useState<Pokemon[]>([]);
+    const [pagination, setPagination] = useState<Pagination | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
   
-    const fetchPokemon = async (): Promise<void> => {
-        setLoading(true);
-        setError(null);
-  
-        try {
-            const res = await axios.get<Pokemon>('http://localhost:8080/api/pokemon');
-            setData(res.data.pokemon);
-        } catch (err) {
-            setError("Error fetching Pokémon.");
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
-  
     useEffect(() => {
-      fetchPokemon();
-    }, []);
+        const fetchPokemon = async (): Promise<void> => {
+            setLoading(true);
+            setError(null);
+      
+            try {
+                const res = await axios.get<PokemonResponse>(`http://localhost:8080/api/pokemon?page=${page}&limit=${max}`);
+                
+                if (res.status !== 200) {
+                    throw new Error(`Error: ${res.status}`);
+                }
+                
+                const data: PokemonResponse = res.data;
+                setPokemon(data.data);
+                setPagination(data.pagination);
+            } catch (err) {
+                setError("Error fetching pokemon.");
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPokemon();
+    }, [page, max]);
   
-    return { data, loading, error };
+    return { pokemon, pagination, loading, error };
 };
+
 export default useFetchPokemon;
