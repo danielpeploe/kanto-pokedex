@@ -7,8 +7,11 @@ main = Blueprint('main', __name__)
 @main.route("/api/pokemon", methods=['GET'])
 def pokemon() -> Union[Dict[str, Any], tuple[Dict[str, Any], int]]:
     # Get the page and limit parameters from the query string
-    page = int(request.args.get('page', 1))
-    limit = int(request.args.get('limit', 10))
+    try:
+        page = int(request.args.get('page', 1))
+        limit = int(request.args.get('limit', 10))
+    except ValueError:
+        return jsonify({"error": "Invalid page or limit parameter"}), 400
 
     # Fetch pokemon data and handle response
     pokemon_data = fetch_pokemon(page, limit)

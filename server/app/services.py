@@ -51,7 +51,8 @@ def fetch_pokemon_details_by_url(url: str) -> Optional[Dict[str, Any]]:
         data = response.json()
         
         # Check if the pokemon is from Kanto dex
-        if data['id'] > 151:
+        pokemon_id = data.get('id')
+        if pokemon_id is None or pokemon_id > 151:
             return None
         
         pokemon_details = {
