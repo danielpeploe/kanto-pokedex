@@ -17,12 +17,14 @@ mock_pokemon_response = {
     "height": 7,
     "weight": 69,
     "sprites": {"front_default": "https://pokeapi.co/media/sprites/pokemon/1.png"},
+    "abilities": [{"ability": {"name": "overgrow"}}, {"ability": {"name": "chlorophyll"}}],
+    "stats": [{"stat": {"name": "hp"}, "base_stat": 45}],
 }
 
 mock_pokemon_list_response = {
     "results": [
-        {"url": "https://pokeapi.co/api/v2/pokemon/1/"},
-        {"url": "https://pokeapi.co/api/v2/pokemon/2/"}
+        {"name": "bulbasaur", "url": "https://pokeapi.co/api/v2/pokemon/1/"},
+        {"name": "ivysaur", "url": "https://pokeapi.co/api/v2/pokemon/2/"}
     ]
 }
 
@@ -38,6 +40,8 @@ def test_fetch_pokemon_details_by_name_success(mocker):
     assert result["height"] == 7
     assert result["weight"] == 69
     assert result["sprite"] == "https://pokeapi.co/media/sprites/pokemon/1.png"
+    assert result["abilities"] == ["overgrow", "chlorophyll"]
+    assert result["base_stats"]["hp"] == 45
 
 def test_fetch_pokemon_details_by_name_not_found(mocker):
     mock_response = Mock(status_code=404)

@@ -18,9 +18,26 @@ class TestPokemonAPI(unittest.TestCase):
     @patch('app.services.fetch_pokemon')
     def test_pokemon_success(self, mock_fetch_pokemon):
         """Test the pokemon endpoint with valid data."""
+        
         mock_data = {
             "data": [
-                {"number": 1, "name": "bulbasaur", "types": ["grass", "poison"], "height": 7, "weight": 69, "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png"}
+                {
+                    "number": 1, 
+                    "name": "bulbasaur", 
+                    "types": ["grass", "poison"], 
+                    "height": 7, 
+                    "weight": 69, 
+                    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
+                    "abilities": ["overgrow", "chlorophyll"],
+                    "base_stats": {
+                        "hp": 45,
+                        "attack": 49,
+                        "defense": 49,
+                        "special-attack": 65,
+                        "special-defense": 65,
+                        "speed": 45
+                    }
+                }
             ],
             "pagination": {"page": 1, "limit": 1, "total": 151, "next_page": 2, "previous_page": None}
         }
