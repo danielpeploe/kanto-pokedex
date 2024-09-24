@@ -29,7 +29,7 @@ def fetch_pokemon(page: int, limit: int) -> Optional[Dict[str, Union[list, Dict[
 
     if response.status_code == 200:
         pokemon_list = response.json()['results']
-        pokemon_data = [detail for pokemon in pokemon_list if (detail := fetch_pokemon_details_by_url(pokemon['url']))]
+        pokemon_data = [detail for pokemon in pokemon_list if (detail := fetch_pokemon_details_by_name(pokemon['name']))]
 
         pagination_info = {
             "page": page,
@@ -43,10 +43,10 @@ def fetch_pokemon(page: int, limit: int) -> Optional[Dict[str, Union[list, Dict[
     else:
         return None
 
-def fetch_pokemon_details_by_url(url: str) -> Optional[Dict[str, Any]]:
-    """Fetch details of a pokemon by its URL."""
+def fetch_pokemon_details_by_name(name: str) -> Optional[Dict[str, Any]]:
+    """Fetch details of a pokemon by its name."""
     try:
-        response = requests.get(url)
+        response = requests.get(f"{POKEAPI_BASE_URL}/pokemon/{name}")
         response.raise_for_status()  # Raise an error for bad responses
         data = response.json()
         
@@ -61,9 +61,12 @@ def fetch_pokemon_details_by_url(url: str) -> Optional[Dict[str, Any]]:
             "types": [t['type']['name'] for t in data['types']],
             "height": data['height'],
             "weight": data['weight'],
-            "sprite": data['sprites']['front_default']
+            "sprite": data['sprites']['front_default'],
+            "abilities": [a['ability']['name'] for a in data['abilities']],
+            "base_stats":  {stat['stat']['name']: stat['base_stat'] for stat in data['stats']}
+
         }
         return pokemon_details
     except requests.RequestException as e:
-        print(f"Error fetching details for {url}: {e}")
+        print(f"Error fetching details for {name}: {e}")
         return None

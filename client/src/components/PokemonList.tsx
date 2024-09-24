@@ -1,4 +1,4 @@
-import useFetchPokemon from '../hooks/useFetchPokemon';
+import useFetchPokemon from '../hooks/useFetchPokemonList';
 import { useState } from 'react';
 import '../App.css'
 import { Pokemon} from '../types';
@@ -32,20 +32,23 @@ function PokemonList () {
     } else if (error) {
         return <div>{error}</div>;
     } else {
-        console.log(pokemon)
         return (
             <div>
                 <h1>Kanto Pokémon</h1>
                 <div className='pokemon-list'>
                     <ul className="pokemon-grid">
                         {pokemon.map((pokemon: Pokemon) => (
-                            <li key={pokemon.number} className="pokemon-item">
-                                <img src={pokemon.sprite} alt={pokemon.name} />
-                                <h2>{pokemon.name} (#{pokemon.number})</h2>
-                                <p>Types: {pokemon.types.join(', ')}</p>
-                                <p>Height: {pokemon.height}</p>
-                                <p>Weight: {pokemon.weight}</p>
-                            </li>
+                            <button>
+                                <a href={`/pokemon/${pokemon.name}`}>
+                                    <li key={pokemon.number} className="pokemon-item">
+                                        <img src={pokemon.sprite} alt={pokemon.name} />
+                                        <h2>{pokemon.name} (#{pokemon.number})</h2>
+                                        <p>Types: {pokemon.types.join(', ')}</p>
+                                        <p>Height: {pokemon.height}</p>
+                                        <p>Weight: {pokemon.weight}</p>
+                                    </li>
+                                </a>
+                            </button>
                         ))}
                     </ul>
                     <div>
@@ -59,7 +62,6 @@ function PokemonList () {
                     </div>
                 </div>
             </div>
-
           );
     }
 }
