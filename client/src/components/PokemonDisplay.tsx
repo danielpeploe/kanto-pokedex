@@ -1,8 +1,6 @@
 import useFetchPokemonByName from '../hooks/useFetchPokemonByName';
-import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import '../App.css'
-import { Pokemon} from '../types';
 
 
 function PokemonDisplay() {
