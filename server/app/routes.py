@@ -33,11 +33,3 @@ def display_pokemon():
     pokemon_data = fetch_pokemon_details_by_name(name)
     
     return jsonify(pokemon_data), 200
-
-    # Fetch pokemon data and handle response
-    # pokemon_data = fetch_pokemon(page, limit)
-
-    # if pokemon_data is not None:
-    #     return jsonify(pokemon_data), 200
-    # else:
-    #     return jsonify({"error": "Failed to fetch data from API"}), 500
