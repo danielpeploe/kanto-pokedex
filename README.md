@@ -45,6 +45,7 @@ https://pokeapi.co/docs/v2
      ```
    - Tests:
      ```sh
+     cd tests
      pytest
      ```
 
