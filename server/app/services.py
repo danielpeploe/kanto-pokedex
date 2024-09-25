@@ -4,11 +4,10 @@ from dotenv import load_dotenv
 from typing import Optional, Dict, Any, Union
 
 # Load environment variables
-# Using .env for good practice even though it's unnecessary for this pokeapi
 load_dotenv()
 POKEAPI_BASE_URL = os.getenv("POKEAPI_BASE_URL", "https://pokeapi.co/api/v2")
 
-def fetch_pokemon(page: int, limit: int) -> Optional[Dict[str, Union[list, Dict[str, Union[int, Optional[int]]]]]]:
+def fetch_pokemon(page: int, limit: int, search_string: str, sort: str) -> Optional[Dict[str, Union[list, Dict[str, Union[int, Optional[int]]]]]]:
     """Fetch pokemon data with pagination."""
     # Calculate how many to skip
     offset = (page - 1) * limit
@@ -24,11 +23,46 @@ def fetch_pokemon(page: int, limit: int) -> Optional[Dict[str, Union[list, Dict[
                 "previous_page": None
             }
         }
-
-    response = requests.get(f"{POKEAPI_BASE_URL}/pokemon/?offset={offset}&limit={limit}")
+    
+    response = requests.get(f"{POKEAPI_BASE_URL}/pokemon/?limit={151}")
 
     if response.status_code == 200:
         pokemon_list = response.json()['results']
+
+        # Nested function for handling search
+        def handle_search():
+            """Handles the search string and filters the pokemon list."""
+            nonlocal pokemon_list
+
+            if search_string.isdigit():
+                if int(search_string) <= 151:
+                    pokemon_list = [pokemon_list[int(search_string) - 1]]
+            else:
+                pokemon_list = [pokemon for pokemon in pokemon_list if search_string.lower() in pokemon["name"].lower()]
+        
+        # Nested function for handling sorting
+        def handle_sort():
+            """Handles the sorting of the pokemon list."""
+            nonlocal pokemon_list
+
+            match sort:
+                case "number-dsc":
+                    pokemon_list = sorted(pokemon_list, key=lambda x: int(x['url'].split('/')[-2]), reverse=True)
+                case "alpha-asc":
+                    pokemon_list = sorted(pokemon_list, key=lambda x: x['name'])
+                case "alpha-dsc":
+                    pokemon_list = sorted(pokemon_list, key=lambda x: x['name'], reverse=True)
+                case _:
+                    # Default to number ascending
+                    pokemon_list = sorted(pokemon_list, key=lambda x: int(x['url'].split('/')[-2]))
+
+
+        if search_string != '':
+            handle_search()
+
+        handle_sort()
+
+        pokemon_list = pokemon_list[offset:(page * 10)]
         pokemon_data = [detail for pokemon in pokemon_list if (detail := fetch_pokemon_details_by_name(pokemon['name']))]
 
         pagination_info = {
@@ -64,7 +98,6 @@ def fetch_pokemon_details_by_name(name: str) -> Optional[Dict[str, Any]]:
             "sprite": data['sprites']['front_default'],
             "abilities": [a['ability']['name'] for a in data['abilities']],
             "base_stats":  {stat['stat']['name']: stat['base_stat'] for stat in data['stats']}
-
         }
         return pokemon_details
     except requests.RequestException as e:

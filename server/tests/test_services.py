@@ -67,7 +67,7 @@ def test_fetch_pokemon_success(mocker):
         Mock(status_code=200, json=lambda: mock_pokemon_response)
     ])
 
-    result = fetch_pokemon(1, 2)
+    result = fetch_pokemon(1, 2, '', 'number-asc')
 
     assert result is not None
     assert len(result["data"]) == 2
@@ -82,7 +82,7 @@ def test_fetch_pokemon_no_results(mocker):
     mock_response.json.return_value = {"results": []}
     mocker.patch('requests.get', return_value=mock_response)
 
-    result = fetch_pokemon(2, 10)
+    result = fetch_pokemon(2, 10, '', 'number-asc')
 
     assert result is not None
     assert len(result["data"]) == 0
@@ -91,6 +91,23 @@ def test_fetch_pokemon_no_results(mocker):
 def test_fetch_pokemon_api_error(mocker):
     mocker.patch('requests.get', return_value=Mock(status_code=500))
 
-    result = fetch_pokemon(1, 10)
+    result = fetch_pokemon(1, 10, '', 'number-asc')
 
     assert result is None
+
+def test_fetch_pokemon_search(mocker):
+    mocker.patch('requests.get', side_effect=[
+        Mock(status_code=200, json=lambda: mock_pokemon_list_response),
+        Mock(status_code=200, json=lambda: mock_pokemon_response),
+        Mock(status_code=200, json=lambda: mock_pokemon_response)
+    ])
+
+    result = fetch_pokemon(1, 2, 'bulba', 'number-asc')
+
+    assert result is not None
+    assert len(result["data"]) == 1
+    assert result["pagination"]["page"] == 1
+    assert result["pagination"]["limit"] == 2
+    assert result["pagination"]["total"] == 151
+    assert result["pagination"]["next_page"] == 2
+    assert result["pagination"]["previous_page"] is None

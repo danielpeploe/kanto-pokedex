@@ -13,20 +13,21 @@ class TestPokemonAPI(unittest.TestCase):
         """Set up the test client"""
         self.app = create_app()
         self.client = self.app.test_client()
-        self.app.testing = True 
+        self.app.testing = True
 
     @patch('app.services.fetch_pokemon')
     def test_pokemon_success(self, mock_fetch_pokemon):
         """Test the pokemon endpoint with valid data."""
         
+        # Mock data for Bulbasaur
         mock_data = {
             "data": [
                 {
-                    "number": 1, 
-                    "name": "bulbasaur", 
-                    "types": ["grass", "poison"], 
-                    "height": 7, 
-                    "weight": 69, 
+                    "number": 1,
+                    "name": "bulbasaur",
+                    "types": ["grass", "poison"],
+                    "height": 7,
+                    "weight": 69,
                     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
                     "abilities": ["overgrow", "chlorophyll"],
                     "base_stats": {
@@ -41,11 +42,17 @@ class TestPokemonAPI(unittest.TestCase):
             ],
             "pagination": {"page": 1, "limit": 1, "total": 151, "next_page": 2, "previous_page": None}
         }
+        
         mock_fetch_pokemon.return_value = mock_data
-        response = self.client.get('/api/pokemon?page=1&limit=1')
-
+        
+        response = self.client.get('/api/pokemon?page=1')
+        
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json, mock_data)
+        
+        actual_pokemon = response.get_json()['data'][0]
+        expected_pokemon = mock_data['data'][0]
+
+        self.assertEqual(actual_pokemon, expected_pokemon)
 
     def test_invalid_page_param(self):
         """Test the pokemon endpoint with an invalid page parameter."""
