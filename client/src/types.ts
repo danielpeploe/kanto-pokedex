@@ -5,6 +5,15 @@ export interface Pokemon {
   height: number;
   weight: number;
   sprite: string;
+  abilities: string[];
+  base_stats: {
+    hp: number;
+    attack: number;
+    defense: number;
+    'special-attack': number;
+    'special-defense': number;
+    speed: number;
+  };
 }
 
 export interface Pagination {

@@ -3,7 +3,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import pytest
-from app.services import fetch_pokemon, fetch_pokemon_details_by_url
+from app.services import fetch_pokemon, fetch_pokemon_details_by_name
 from unittest.mock import patch, Mock
 
 import requests
@@ -17,19 +17,21 @@ mock_pokemon_response = {
     "height": 7,
     "weight": 69,
     "sprites": {"front_default": "https://pokeapi.co/media/sprites/pokemon/1.png"},
+    "abilities": [{"ability": {"name": "overgrow"}}, {"ability": {"name": "chlorophyll"}}],
+    "stats": [{"stat": {"name": "hp"}, "base_stat": 45}],
 }
 
 mock_pokemon_list_response = {
     "results": [
-        {"url": "https://pokeapi.co/api/v2/pokemon/1/"},
-        {"url": "https://pokeapi.co/api/v2/pokemon/2/"}
+        {"name": "bulbasaur", "url": "https://pokeapi.co/api/v2/pokemon/1/"},
+        {"name": "ivysaur", "url": "https://pokeapi.co/api/v2/pokemon/2/"}
     ]
 }
 
-def test_fetch_pokemon_details_by_url_success(mocker):
+def test_fetch_pokemon_details_by_name_success(mocker):
     mocker.patch('requests.get', return_value=Mock(status_code=200, json=lambda: mock_pokemon_response))
 
-    result = fetch_pokemon_details_by_url("https://pokeapi.co/api/v2/pokemon/1/")
+    result = fetch_pokemon_details_by_name("bulbasaur")
     
     assert result is not None
     assert result["number"] == 1
@@ -38,20 +40,22 @@ def test_fetch_pokemon_details_by_url_success(mocker):
     assert result["height"] == 7
     assert result["weight"] == 69
     assert result["sprite"] == "https://pokeapi.co/media/sprites/pokemon/1.png"
+    assert result["abilities"] == ["overgrow", "chlorophyll"]
+    assert result["base_stats"]["hp"] == 45
 
-def test_fetch_pokemon_details_by_url_not_found(mocker):
+def test_fetch_pokemon_details_by_name_not_found(mocker):
     mock_response = Mock(status_code=404)
     mock_response.json.return_value = {}
     mocker.patch('requests.get', return_value=mock_response)
 
-    result = fetch_pokemon_details_by_url("https://pokeapi.co/api/v2/pokemon/00000/")
+    result = fetch_pokemon_details_by_name("https://pokeapi.co/api/v2/pokemon/00000/")
     
     assert result is None
 
-def test_fetch_pokemon_details_by_url_invalid(mocker):
+def test_fetch_pokemon_details_by_name_invalid(mocker):
     mocker.patch('requests.get', side_effect=requests.exceptions.RequestException)
 
-    result = fetch_pokemon_details_by_url("https://pokeapi.co/api/v2/pokemon/1/")
+    result = fetch_pokemon_details_by_name("https://pokeapi.co/api/v2/pokemon/1/")
     
     assert result is None
 
