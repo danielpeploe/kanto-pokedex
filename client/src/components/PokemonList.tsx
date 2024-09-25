@@ -10,8 +10,10 @@ function PokemonList () {
     const [search, setSearch] = useState<string>("");
     const [inputValue, setInputValue] = useState<string>("");
 
+    const [sort, setSortOption] = useState<string>("number-asc");
+    const [sortValue, setSortValue] = useState<string>("number-asc");
 
-    const {pokemon, pagination, loading, error } = useFetchPokemon(page, max, search);
+    const {pokemon, pagination, loading, error } = useFetchPokemon(page, max, search, sort);
 
     const handleNextPage = () => {
         if (pagination?.next_page) {
@@ -28,6 +30,10 @@ function PokemonList () {
     const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setSearch(inputValue);
+        setSortOption(sortValue);
+        setPage(1);
+
+        console.log(sortValue);
     };
     
     if (loading) {
@@ -45,6 +51,14 @@ function PokemonList () {
                 <h1>Kanto Pokémon</h1>
                 <div>
                     <form onSubmit={handleSearchSubmit}>
+                    <select
+                        value={sortValue}
+                        onChange={(e) => setSortValue(e.target.value)}>
+                        <option value="number-asc">{"Number (ASC)"}</option>
+                        <option value="number-dsc">{"Number (DSC)"}</option>
+                        <option value="alpha-asc">{"A - Z"}</option>
+                        <option value="alpha-dsc">{"Z - A"}</option>
+                    </select>
                         <input
                             type="text"
                             value={inputValue}

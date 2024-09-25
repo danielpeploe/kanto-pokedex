@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Pokemon, Pagination, PokemonResponse } from '../types';
 
-const useFetchPokemon = (page: number, max: number, search: string) => {
+const useFetchPokemon = (page: number, max: number, search: string, sort: string) => {
     const [pokemon, setPokemon] = useState<Pokemon[]>([]);
     const [pagination, setPagination] = useState<Pagination | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -14,7 +14,7 @@ const useFetchPokemon = (page: number, max: number, search: string) => {
             setError(null);
       
             try {
-                const res = await axios.get<PokemonResponse>(`http://localhost:8080/api/pokemon?page=${page}&limit=${max}&search=${search}`);
+                const res = await axios.get<PokemonResponse>(`http://localhost:8080/api/pokemon?page=${page}&limit=${max}&search=${search}&sort=${sort}`);
                 
                 if (res.status !== 200) {
                     throw new Error(`Error: ${res.status}`);
@@ -32,7 +32,7 @@ const useFetchPokemon = (page: number, max: number, search: string) => {
         };
 
         fetchPokemon();
-    }, [page, max, search]);
+    }, [page, max, search, sort]);
   
     return { pokemon, pagination, loading, error };
 };

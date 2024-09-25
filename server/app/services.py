@@ -7,7 +7,7 @@ from typing import Optional, Dict, Any, Union
 load_dotenv()
 POKEAPI_BASE_URL = os.getenv("POKEAPI_BASE_URL", "https://pokeapi.co/api/v2")
 
-def fetch_pokemon(page: int, limit: int, search_string: str) -> Optional[Dict[str, Union[list, Dict[str, Union[int, Optional[int]]]]]]:
+def fetch_pokemon(page: int, limit: int, search_string: str, sort: str) -> Optional[Dict[str, Union[list, Dict[str, Union[int, Optional[int]]]]]]:
     """Fetch pokemon data with pagination."""
     # Calculate how many to skip
     offset = (page - 1) * limit
@@ -39,9 +39,28 @@ def fetch_pokemon(page: int, limit: int, search_string: str) -> Optional[Dict[st
                     pokemon_list = [pokemon_list[int(search_string) - 1]]
             else:
                 pokemon_list = [pokemon for pokemon in pokemon_list if search_string.lower() in pokemon["name"].lower()]
+        
+        # Nested function for handling sorting
+        def handle_sort():
+            """Handles the sorting of the pokemon list."""
+            nonlocal pokemon_list
+
+            match sort:
+                case "number-dsc":
+                    pokemon_list = sorted(pokemon_list, key=lambda x: int(x['url'].split('/')[-2]), reverse=True)
+                case "alpha-asc":
+                    pokemon_list = sorted(pokemon_list, key=lambda x: x['name'])
+                case "alpha-dsc":
+                    pokemon_list = sorted(pokemon_list, key=lambda x: x['name'], reverse=True)
+                case _:
+                    # Default to number ascending
+                    pokemon_list = sorted(pokemon_list, key=lambda x: int(x['url'].split('/')[-2]))
+
 
         if search_string != '':
             handle_search()
+
+        handle_sort()
 
         pokemon_list = pokemon_list[offset:(page * 10)]
         pokemon_data = [detail for pokemon in pokemon_list if (detail := fetch_pokemon_details_by_name(pokemon['name']))]
